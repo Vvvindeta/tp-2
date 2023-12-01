@@ -1,102 +1,111 @@
 ﻿#include <iostream>
-#include <fstream>
-#include <sstream>
-#include <vector>
+#include <string>
 
 class ROUTE {
 private:
-    std::string start_point;
-    std::string end_point;
-    int route_number;
+    std::string startLocation;
+    std::string endLocation;
+    int routeNumber;
 
 public:
-    ROUTE() : route_number(0) {}
+    // Конструкторы
+    ROUTE() : startLocation(""), endLocation(""), routeNumber(0) {
+        std::cout << "Default constructor called." << std::endl;
+    }
 
-    friend std::istream& operator>>(std::istream& is, ROUTE& route) {
-        std::cout << "Введите название начального пункта маршрута: ";
-        is >> route.start_point;
+    ROUTE(std::string start, std::string end, int number) : startLocation(start), endLocation(end), routeNumber(number) {
+        std::cout << "Parameterized constructor called." << std::endl;
+    }
 
-        std::cout << "Введите название конечного пункта маршрута: ";
-        is >> route.end_point;
+    ROUTE(const ROUTE& other) : startLocation(other.startLocation), endLocation(other.endLocation), routeNumber(other.routeNumber) {
+        std::cout << "Copy constructor called." << std::endl;
+    }
 
-        std::cout << "Введите номер маршрута: ";
-        is >> route.route_number;
+    // Деструктор
+    ~ROUTE() {
+        std::cout << "Destructor called for Route " << routeNumber << "." << std::endl;
+    }
 
-        return is;
+    // Методы доступа
+    std::string getStartLocation() const {
+        return startLocation;
+    }
+
+    std::string getEndLocation() const {
+        return endLocation;
+    }
+
+    int getRouteNumber() const {
+        return routeNumber;
+    }
+
+    void setStartLocation(const std::string& start) {
+        startLocation = start;
+    }
+
+    void setEndLocation(const std::string& end) {
+        endLocation = end;
+    }
+
+    void setRouteNumber(int number) {
+        routeNumber = number;
     }
 
     friend std::ostream& operator<<(std::ostream& os, const ROUTE& route) {
-        os << "Маршрут " << route.route_number << ": " << route.start_point << " - " << route.end_point;
+        os << "Route " << route.routeNumber << ": " << route.startLocation << " to " << route.endLocation;
         return os;
-    }
-
-    const std::string& getStartPoint() const {
-        return start_point;
-    }
-
-    const std::string& getEndPoint() const {
-        return end_point;
     }
 };
 
 int main() {
-    const int ROUTE_COUNT = 8;
-    std::vector<ROUTE> routes;
+    try {
+        int routeCount;
+        std::cout << "Enter the number of routes: ";
+        std::cin >> routeCount;
 
-    // Ввод маршрутов с клавиатуры и сортировка
-    std::cout << "Введите данные для маршрутов:\n";
-    for (int i = 0; i < ROUTE_COUNT; ++i) {
-        ROUTE route;
-        std::cin >> route;
-        routes.push_back(route);
-    }
+        // Динамическое выделение памяти для массива объектов ROUTE
+        ROUTE* routes = new ROUTE[routeCount];
 
-    // Вывод на экран информации о маршрутах по названию пункта
-    std::string target_point;
-    std::cout << "Введите название пункта: ";
-    std::cin >> target_point;
+        // Заполнение данных о маршрутах
+        for (int i = 0; i < routeCount; ++i) {
+            std::string start, end;
+            int number;
 
-    bool found = false;
-    for (const auto& route : routes) {
-        if (route.getStartPoint() == target_point || route.getEndPoint() == target_point) {
-            std::cout << route << std::endl;
-            found = true;
+            std::cout << "Enter start location for Route " << i + 1 << ": ";
+            std::cin >> start;
+
+            std::cout << "Enter end location for Route " << i + 1 << ": ";
+            std::cin >> end;
+
+            std::cout << "Enter route number for Route " << i + 1 << ": ";
+            std::cin >> number;
+
+            routes[i] = ROUTE(start, end, number);
         }
-    }
 
-    if (!found) {
-        std::cout << "Маршруты не найдены.\n";
-    }
+        // Вывод информации о маршрутах
+        std::string location;
+        std::cout << "Enter location to search: ";
+        std::cin >> location;
 
-    // Использование файловых и строковых потоков для чтения из файла
-    std::ifstream inputFile("example.txt");
-    if (!inputFile.is_open()) {
-        std::cerr << "Не удалось открыть файл.\n";
-        return 1;
-    }
-
-    std::cout << "\nСтроки из файла, не содержащие двузначные числа:\n";
-    std::string line;
-    while (std::getline(inputFile, line)) {
-        std::istringstream iss(line);
-        bool containsTwoDigitNumber = false;
-
-        // Проверка строки на наличие двузначных чисел
-        std::string word;
-        while (iss >> word) {
-            if (word.size() == 2 && std::isdigit(word[0]) && std::isdigit(word[1])) {
-                containsTwoDigitNumber = true;
-                break;
+        bool found = false;
+        for (int i = 0; i < routeCount; ++i) {
+            if (routes[i].getStartLocation() == location || routes[i].getEndLocation() == location) {
+                std::cout << routes[i] << std::endl;
+                found = true;
             }
         }
 
-        // Вывод строки, если не содержит двузначные числа
-        if (!containsTwoDigitNumber) {
-            std::cout << line << std::endl;
+        if (!found) {
+            std::cout << "No routes found for the specified location." << std::endl;
         }
-    }
 
-    inputFile.close();
+        // Освобождение выделенной памяти
+        delete[] routes;
+    }
+    catch (const std::exception& e) {
+        std::cerr << "Exception: " << e.what() << std::endl;
+    }
 
     return 0;
 }
