@@ -1,111 +1,162 @@
-﻿#include <iostream>
-#include <string>
+﻿#include <vector>
+#include "fileprocessor.h"
+#include "route.h"
 
-class ROUTE {
-private:
-    std::string startLocation;
-    std::string endLocation;
-    int routeNumber;
-
-public:
-    // Конструкторы
-    ROUTE() : startLocation(""), endLocation(""), routeNumber(0) {
-        std::cout << "Default constructor called." << std::endl;
-    }
-
-    ROUTE(std::string start, std::string end, int number) : startLocation(start), endLocation(end), routeNumber(number) {
-        std::cout << "Parameterized constructor called." << std::endl;
-    }
-
-    ROUTE(const ROUTE& other) : startLocation(other.startLocation), endLocation(other.endLocation), routeNumber(other.routeNumber) {
-        std::cout << "Copy constructor called." << std::endl;
-    }
-
-    // Деструктор
-    ~ROUTE() {
-        std::cout << "Destructor called for Route " << routeNumber << "." << std::endl;
-    }
-
-    // Методы доступа
-    std::string getStartLocation() const {
-        return startLocation;
-    }
-
-    std::string getEndLocation() const {
-        return endLocation;
-    }
-
-    int getRouteNumber() const {
-        return routeNumber;
-    }
-
-    void setStartLocation(const std::string& start) {
-        startLocation = start;
-    }
-
-    void setEndLocation(const std::string& end) {
-        endLocation = end;
-    }
-
-    void setRouteNumber(int number) {
-        routeNumber = number;
-    }
-
-    friend std::ostream& operator<<(std::ostream& os, const ROUTE& route) {
-        os << "Route " << route.routeNumber << ": " << route.startLocation << " to " << route.endLocation;
-        return os;
-    }
-};
+int displayMenu() {
+    int choice;
+    std::cout << "\nМЕНЮ:\n";
+    std::cout << "1. Ввод данных о маршрутах\n";
+    std::cout << "2. Вывод данных о маршрутах\n";
+    std::cout << "3. Просмотр данных о конкретном маршруте\n";
+    std::cout << "4. Изменение данных о конкретном маршруте\n";
+    std::cout << "5. Добавление нового маршрута\n";
+    std::cout << "6. Удаление маршрута\n";
+    std::cout << "7. Работа с файлами\n";
+    std::cout << "8. Выйти\n";
+    std::cout << "Введите ваш выбор: ";
+    std::cin >> choice;
+    return choice;
+}
 
 int main() {
-    try {
-        int routeCount;
-        std::cout << "Enter the number of routes: ";
-        std::cin >> routeCount;
+    setlocale(LC_ALL, "Russian");
+    int choice;
+    std::vector<ROUTE> routes; // Используем вектор для удобства добавления/удаления
+    const int ARRAY_SIZE = 8;
 
-        // Динамическое выделение памяти для массива объектов ROUTE
-        ROUTE* routes = new ROUTE[routeCount];
+    do {
+        choice = displayMenu();
 
-        // Заполнение данных о маршрутах
-        for (int i = 0; i < routeCount; ++i) {
-            std::string start, end;
-            int number;
-
-            std::cout << "Enter start location for Route " << i + 1 << ": ";
-            std::cin >> start;
-
-            std::cout << "Enter end location for Route " << i + 1 << ": ";
-            std::cin >> end;
-
-            std::cout << "Enter route number for Route " << i + 1 << ": ";
-            std::cin >> number;
-
-            routes[i] = ROUTE(start, end, number);
+        switch (choice) {
+        case 1: {
+            ROUTE newRoute;
+            std::cin >> newRoute;
+            routes.push_back(newRoute);
+            break;
         }
 
-        // Вывод информации о маршрутах
-        std::string location;
-        std::cout << "Enter location to search: ";
-        std::cin >> location;
-
-        bool found = false;
-        for (int i = 0; i < routeCount; ++i) {
-            if (routes[i].getStartLocation() == location || routes[i].getEndLocation() == location) {
-                std::cout << routes[i] << std::endl;
-                found = true;
+        case 2: {
+            // Вывод данных
+            for (const auto& route : routes) {
+                std::cout << route << '\n';
             }
+            break;
         }
 
-        if (!found) {
-            std::cout << "No routes found for the specified location." << std::endl;
+        case 3: {
+            // Просмотр данных о конкретном маршруте
+            int routeNumber;
+            std::cout << "Введите номер маршрута для просмотра: ";
+            std::cin >> routeNumber;
+
+            // Поиск маршрута с указанным номером
+            bool found = false;
+            for (const auto& route : routes) {
+                if (route.getRouteNumber() == routeNumber) {
+                    std::cout << "Найден маршрут:\n" << route << '\n';
+                    found = true;
+                    break;
+                }
+            }
+
+            if (!found) {
+                std::cout << "Маршрут с номером " << routeNumber << " не найден.\n";
+            }
+
+            break;
         }
 
-        // Освобождение выделенной памяти
-        delete[] routes;
-    }
-    catch (const std::exception& e) {
-        std::cerr << "Exception: " << e.what() << std::endl;
-    }
+        case 4: {
+            // Изменение данных о конкретном маршруте
+            int routeNumber;
+            std::cout << "Введите номер маршрута для изменения: ";
+            std::cin >> routeNumber;
+
+            // Поиск маршрута с указанным номером
+            auto it = std::find_if(routes.begin(), routes.end(),
+                [routeNumber](const ROUTE& route) {
+                    return route.getRouteNumber() == routeNumber;
+                });
+
+            if (it != routes.end()) {
+                std::cout << "Текущие данные маршрута:\n" << *it << '\n';
+                std::cin >> *it;
+                std::cout << "Данные маршрута изменены:\n" << *it << '\n';
+            }
+            else {
+                std::cout << "Маршрут с номером " << routeNumber << " не найден.\n";
+            }
+
+            break;
+        }
+
+        case 5: {
+            // Добавление нового маршрута на любую позицию
+            int position;
+            std::cout << "Введите позицию для добавления нового маршрута: ";
+            std::cin >> position;
+
+            if (position >= 1 && position <= routes.size() + 1) {
+                ROUTE newRoute;
+                std::cin >> newRoute;
+                routes.insert(routes.begin() + position - 1, newRoute);
+                std::cout << "Новый маршрут добавлен на позицию " << position << ".\n";
+            }
+            else {
+                std::cout << "Некорректная позиция. Маршрут не добавлен.\n";
+            }
+
+            break;
+        }
+
+        case 6: {
+            // Удаление маршрута по номеру
+            int routeNumber;
+            std::cout << "Введите номер маршрута для удаления: ";
+            std::cin >> routeNumber;
+
+            auto it = std::remove_if(routes.begin(), routes.end(),
+                [routeNumber](const ROUTE& route) {
+                    return route.getRouteNumber() == routeNumber;
+                });
+
+            if (it != routes.end()) {
+                routes.erase(it, routes.end());
+                std::cout << "Маршрут с номером " << routeNumber << " удален.\n";
+            }
+            else {
+                std::cout << "Маршрут с номером " << routeNumber << " не найден.\n";
+            }
+
+            break;
+        }
+
+        case 7: {
+            FileProcessor fileProcessor;
+
+            try {
+                std::string fileName;
+                std::cout << "Введите имя файла: ";
+                std::cin >> fileName;
+                fileProcessor.setFileName(fileName);
+                fileProcessor.processFile();
+            }
+            catch (const std::exception& e) {
+                std::cerr << "Ошибка: " << e.what() << std::endl;
+            }
+
+            break;
+        }
+
+        case 8:
+            std::cout << "Программа завершена.\n";
+            break;
+
+        default:
+            std::cout << "Некорректный выбор. Пожалуйста, введите допустимую опцию.\n";
+        }
+
+    } while (choice != 8);
 
     return 0;
 }

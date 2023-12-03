@@ -128,6 +128,12 @@
   </ItemDefinitionGroup>
   <ItemGroup>
     <ClCompile Include="ConsoleApplication1.cpp" />
+    <ClCompile Include="fileprocessor.cpp" />
+    <ClCompile Include="route.cpp" />
+  </ItemGroup>
+  <ItemGroup>
+    <ClInclude Include="fileprocessor.h" />
+    <ClInclude Include="route.h" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">
