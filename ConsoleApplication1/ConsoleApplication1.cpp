@@ -1,4 +1,5 @@
 ﻿#include <vector>
+#include <algorithm>
 #include "fileprocessor.h"
 #include "route.h"
 
@@ -29,9 +30,18 @@ int main() {
 
         switch (choice) {
         case 1: {
-            ROUTE newRoute;
-            std::cin >> newRoute;
-            routes.push_back(newRoute);
+            // Ввод данных маршрутов
+            for (int i = 0; i < ARRAY_SIZE; ++i) {
+                ROUTE newRoute;
+                std::cin >> newRoute;
+                routes.push_back(newRoute);
+            }
+
+            // Сортировка по номерам маршрутов
+            std::sort(routes.begin(), routes.end(),
+                [](const ROUTE& a, const ROUTE& b) {
+                    return a.getRouteNumber() < b.getRouteNumber();
+                });
             break;
         }
 
